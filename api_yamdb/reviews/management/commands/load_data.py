@@ -1,7 +1,9 @@
 from csv import DictReader
 from django.core.management import BaseCommand
 
-from reviews.models import Comment, Review, Category, Genre, Title, User
+from reviews.models import (
+    Comment, Review, Category, Genre, Title, User, GenreTitle
+)
 
 
 class Command(BaseCommand):
@@ -11,68 +13,47 @@ class Command(BaseCommand):
     def load_comments(self):
         with open('comments.csv') as data:
             for row in DictReader(data):
-                instance = Comment(
-                    id=row['id'], text=row['text'],
-                    author=row['author'], pub_date=row['pub_date'],
-                    review=row['review_id']
-                )
+                row['review'] = row.pop('review_id')
+                instance = Comment(**row)
                 instance.save()
 
     def load_reviews(self):
         with open('review.csv') as data:
             for row in DictReader(data):
-                instance = Review(
-                    id=row['id'], text=row['text'],
-                    author=row['author'], pub_date=row['pub_date'],
-                    title=row['title_id'], score=row['score'],
-                )
+                row['title'] = row.pop('title_id')
+                instance = Review(**row)
                 instance.save()
 
     def load_category(self):
         with open('category.csv') as data:
             for row in DictReader(data):
-                instance = Category(
-                    id=row['id'], name=row['name'],
-                    slug=row['slug']
-                )
+                instance = Category(**row)
                 instance.save()
 
     def load_genre(self):
         with open('genre.csv') as data:
             for row in DictReader(data):
-                instance = Genre(
-                    id=row['id'], name=row['name'],
-                    slug=row['slug']
-                )
+                instance = Genre(**row)
                 instance.save()
 
     def load_title(self):
         with open('titles.csv') as data:
             for row in DictReader(data):
-                instance = Title(
-                    id=row['id'], name=row['name'],
-                    year=row['year'], category=row['category']
-                )
+                instance = Title(**row)
                 instance.save()
 
     def load_genre_title(self):
         with open('genre_title.csv') as data:
             for row in DictReader(data):
-                instance = Category(
-                    id=row['id'], title_id=row['title_id'],
-                    genre_id=row['genre_id']
-                )
+                row['review'] = row.pop('review_id')
+                row['title'] = row.pop('title_id')
+                instance = GenreTitle(**row)
                 instance.save()
 
     def load_users(self):
         with open('users.csv') as data:
             for row in DictReader(data):
-                instance = User(
-                    id=row['id'], username=row['username'],
-                    email=row['email'], role=row['role'],
-                    bio=row['bio'], first_name=row['first_name'],
-                    last_name=row['last_name']
-                )
+                instance = User(**row)
                 instance.save()
 
     def handle(self, *args, **options):

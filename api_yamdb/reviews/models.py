@@ -1,3 +1,4 @@
+from core.models import AuthorPubDateText
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -8,19 +9,14 @@ User = get_user_model()
 class Title(models.Model):
     pass
 
-class Review(models.Model):
+
+class Review(AuthorPubDateText):
     """Модель отзывов"""
 
-    author = models.ForeignKey(
-        User, on_delete=models.CASCADE,
-        verbose_name='Автор отзыва'
-    )
-    text = models.TextField('Содержание отзыва')
     score = models.IntegerField(
         'Рейтинг',
         validators=(MinValueValidator(1), MaxValueValidator(10))
     )
-    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE,
         verbose_name='Заголовок',
@@ -32,15 +28,9 @@ class Review(models.Model):
         default_related_name = 'reviews'
 
 
-class Comment(models.Model):
+class Comment(AuthorPubDateText):
     """Модель комментариев"""
 
-    text = models.TextField('Содержание комментария')
-    author = models.ForeignKey(
-        User, on_delete=models.CASCADE,
-        verbose_name='Автор комментария'
-    )
-    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
     review = models.ForeignKey(
         Review, on_delete=models.CASCADE, verbose_name='Отзыв'
     )
