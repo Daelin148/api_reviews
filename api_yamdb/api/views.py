@@ -4,7 +4,7 @@ from rest_framework.filters import SearchFilter
 
 from .filters import TitleFilter
 from .serializers import CategorySerializer, GenreSerializer, TitleSerializer
-from titles.models import Category, Genre, Title
+from reviews.models import Category, Genre, Title
 
 
 class CreateListDestroyViewSet(mixins.CreateModelMixin,

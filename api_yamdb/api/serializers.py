@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.utils import timezone
-from titles.models import Title, Genre, Category
+from reviews.models import Title, Genre, Category
 
 
 class GenreSerializer(serializers.ModelSerializer):
