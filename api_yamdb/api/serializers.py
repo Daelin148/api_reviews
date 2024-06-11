@@ -1,7 +1,8 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 from django.utils import timezone
 
-from reviews.models import Title, Genre, Category
+from reviews.models import Title, Genre, Category, Comment, Review
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -33,3 +34,31 @@ class TitleSerializer(serializers.ModelSerializer):
                 "Год выпуска не может быть больше текущего года."
             )
         return value
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+
+    author = serializers.SlugRelatedField(
+        slug_field='username', read_only=True
+    )
+
+    class Meta:
+        model = Review
+        exclude = ('title',)
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Review.objects.all(),
+                fields=('user', 'title')
+            )
+        ]
+
+
+class CommentSerializer(serializers.ModelSerializer):
+
+    author = serializers.SlugRelatedField(
+        slug_field='username', read_only=True
+    )
+
+    class Meta:
+        model = Comment
+        exclude = ('review',)
