@@ -5,7 +5,7 @@ from rest_framework.filters import SearchFilter
 
 from .filters import TitleFilter
 from .serializers import CategorySerializer, GenreSerializer, TitleSerializer, CommentSerializer, ReviewSerializer
-from reviews.models import Category, Genre, Title, Review, Comment
+from reviews.models import Category, Genre, Title, Review
 
 
 class CreateListDestroyViewSet(mixins.CreateModelMixin,
@@ -35,7 +35,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
 
-    
+
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
 

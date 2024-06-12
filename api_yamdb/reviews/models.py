@@ -1,28 +1,27 @@
-from core.models import AuthorPubDateText
-from django.contrib.auth import get_user_model
+from core.models import AuthorPubDateText, NameBaseModel, NameSlugBaseModel
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from core.models import NameSlugBaseModel
-
-
-User = get_user_model()
-
 
 class Category(NameSlugBaseModel):
+    """Модель категорий."""
+
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
 
 class Genre(NameSlugBaseModel):
+    """Модель жанров."""
+
     class Meta:
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
 
 
-class Title(models.Model):
-    name = models.CharField(max_length=256, verbose_name='Название')
+class Title(NameBaseModel):
+    """Модель произведений."""
+
     year = models.IntegerField(verbose_name='Год выпуска')
     description = models.TextField(blank=True, null=True,
                                    verbose_name='Описание')
@@ -32,9 +31,6 @@ class Title(models.Model):
                                  related_name='titles', null=True,
                                  verbose_name='Категория')
 
-    def __str__(self):
-        return self.name
-
     class Meta:
         ordering = ('year', )
         verbose_name = 'Произведение'
@@ -42,6 +38,8 @@ class Title(models.Model):
 
 
 class GenreTitle(models.Model):
+    """Промежуточная модель для связи жанров и произведений."""
+
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
 
@@ -50,7 +48,7 @@ class GenreTitle(models.Model):
 
 
 class Review(AuthorPubDateText):
-    """Модель отзывов"""
+    """Модель отзывов."""
 
     score = models.IntegerField(
         'Рейтинг',
@@ -68,7 +66,7 @@ class Review(AuthorPubDateText):
 
 
 class Comment(AuthorPubDateText):
-    """Модель комментариев"""
+    """Модель комментариев."""
 
     review = models.ForeignKey(
         Review, on_delete=models.CASCADE, verbose_name='Отзыв'

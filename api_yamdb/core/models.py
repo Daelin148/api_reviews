@@ -1,16 +1,29 @@
-from reviews.models import User
 from django.db import models
+from django.contrib.auth import get_user_model
 
 
-class NameSlugBaseModel(models.Model):
+User = get_user_model()
+
+
+class NameBaseModel(models.Model):
+    """Абстрактная модель с полем name и строковым представлением."""
+
     name = models.CharField(max_length=256, verbose_name='Название')
-    slug = models.SlugField(unique=True, max_length=50, verbose_name='Слаг')
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         abstract = True
 
-    def __str__(self):
-        return self.name
+
+class NameSlugBaseModel(NameBaseModel):
+    """Абстрактная модель с полем slug."""
+
+    slug = models.SlugField(unique=True, max_length=50, verbose_name='Слаг')
+
+    class Meta:
+        abstract = True
 
 
 class AuthorPubDateText(models.Model):

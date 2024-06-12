@@ -1,9 +1,10 @@
 from csv import DictReader
-from django.core.management import BaseCommand
 
+from django.core.management import BaseCommand
 from reviews.models import (
-    Comment, Review, Category, Genre, Title, User, GenreTitle
+    Category, Comment, Genre, GenreTitle, Review, Title
 )
+from core.models import User
 
 
 class Command(BaseCommand):
@@ -11,39 +12,39 @@ class Command(BaseCommand):
     help = "Загружает данные в БД из csv"
 
     def load_comments(self):
-        with open('comments.csv') as data:
+        with open('data/comments.csv') as data:
             for row in DictReader(data):
                 row['review'] = row.pop('review_id')
                 instance = Comment(**row)
                 instance.save()
 
     def load_reviews(self):
-        with open('review.csv') as data:
+        with open('data/review.csv') as data:
             for row in DictReader(data):
                 row['title'] = row.pop('title_id')
                 instance = Review(**row)
                 instance.save()
 
     def load_category(self):
-        with open('category.csv') as data:
+        with open('data/category.csv') as data:
             for row in DictReader(data):
                 instance = Category(**row)
                 instance.save()
 
     def load_genre(self):
-        with open('genre.csv') as data:
+        with open('data/genre.csv') as data:
             for row in DictReader(data):
                 instance = Genre(**row)
                 instance.save()
 
     def load_title(self):
-        with open('titles.csv') as data:
+        with open('data/titles.csv') as data:
             for row in DictReader(data):
                 instance = Title(**row)
                 instance.save()
 
     def load_genre_title(self):
-        with open('genre_title.csv') as data:
+        with open('data/genre_title.csv') as data:
             for row in DictReader(data):
                 row['review'] = row.pop('review_id')
                 row['title'] = row.pop('title_id')
@@ -51,7 +52,7 @@ class Command(BaseCommand):
                 instance.save()
 
     def load_users(self):
-        with open('users.csv') as data:
+        with open('data.users.csv', encoding='utf-8') as data:
             for row in DictReader(data):
                 instance = User(**row)
                 instance.save()
