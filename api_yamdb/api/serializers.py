@@ -1,6 +1,6 @@
 from django.utils import timezone
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
+from rest_framework.validators import UniqueValidator
 
 from core.models import User
 from core.validators import validate_username
@@ -69,27 +69,25 @@ class UserMeSerializer(serializers.ModelSerializer):
         read_only_fields = ('role',)
 
 
-
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genre
-        fields = '__all__'
+        exclude = ('id',)
 
 
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        # fields = '__all__'
         exclude = ('id',)
 
 
 class TitleSerializer(serializers.ModelSerializer):
 
-    genres = serializers.SlugRelatedField(slug_field='slug',
-                                          queryset=Genre.objects.all(),
-                                          many=True)
+    genre = serializers.SlugRelatedField(slug_field='slug',
+                                         queryset=Genre.objects.all(),
+                                         many=True)
     category = serializers.SlugRelatedField(slug_field='slug',
                                             queryset=Category.objects.all())
     rating = serializers.SerializerMethodField()
@@ -106,31 +104,53 @@ class TitleSerializer(serializers.ModelSerializer):
         return value
 
     def get_rating(self, obj):
-        ratings_sum = sum(obj.reviews.all(), key=lambda review: review.score)
-        return ratings_sum // obj.reviews.count()
+        ratings_sum = sum(review.score for review in obj.reviews.all())
+        try:
+            return ratings_sum // obj.reviews.count()
+        except ZeroDivisionError:
+            return None
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        category = instance.category
+        representation['category'] = {
+            'name': category.name,
+            'slug': category.slug
+        }
+        representation['genre'] = GenreSerializer(
+            instance.genre, many=True
+        ).data
+        return representation
 
 
 class ReviewSerializer(serializers.ModelSerializer):
 
     author = serializers.SlugRelatedField(
-        slug_field='username', read_only=True
+        slug_field='username', read_only=True,
+        default=serializers.CurrentUserDefault(),
     )
 
     class Meta:
         model = Review
         exclude = ('title',)
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Review.objects.all(),
-                fields=('user', 'title')
+
+    def validate(self, data):
+        request = self.context['request']
+        if request.method == 'POST' and Review.objects.filter(
+            author=request.user,
+            title_id=self.context['view'].kwargs.get('title_id')
+        ).exists():
+            raise serializers.ValidationError(
+                'Вы можете оставить только один отзыв к произведению'
             )
-        ]
+        return data
 
 
 class CommentSerializer(serializers.ModelSerializer):
 
     author = serializers.SlugRelatedField(
-        slug_field='username', read_only=True
+        slug_field='username', read_only=True,
+        default=serializers.CurrentUserDefault(),
     )
 
     class Meta:

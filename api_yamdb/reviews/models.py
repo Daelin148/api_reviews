@@ -1,6 +1,7 @@
-from core.models import AuthorPubDateText, NameBaseModel, NameSlugBaseModel
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
+from core.models import AuthorPubDateText, NameBaseModel, NameSlugBaseModel
 
 
 class Category(NameSlugBaseModel):
@@ -9,6 +10,7 @@ class Category(NameSlugBaseModel):
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
+        ordering = ('name',)
 
 
 class Genre(NameSlugBaseModel):
@@ -17,6 +19,7 @@ class Genre(NameSlugBaseModel):
     class Meta:
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
+        ordering = ('name',)
 
 
 class Title(NameBaseModel):
@@ -25,8 +28,8 @@ class Title(NameBaseModel):
     year = models.IntegerField(verbose_name='Год выпуска')
     description = models.TextField(blank=True, null=True,
                                    verbose_name='Описание')
-    genres = models.ManyToManyField(Genre, through='GenreTitle',
-                                    verbose_name='Жанры')
+    genre = models.ManyToManyField(Genre, through='GenreTitle',
+                                   verbose_name='Жанры')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL,
                                  related_name='titles', null=True,
                                  verbose_name='Категория')
@@ -63,6 +66,13 @@ class Review(AuthorPubDateText):
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
         default_related_name = 'reviews'
+        ordering = ('-score',)
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='unique_title_author'
+            )
+        ]
 
 
 class Comment(AuthorPubDateText):
@@ -76,3 +86,4 @@ class Comment(AuthorPubDateText):
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
         default_related_name = 'comments'
+        ordering = ('-pub_date',)
