@@ -1,9 +1,8 @@
-from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from core.models import User
-from core.validators import validate_username
+from core.validators import validate_username, validate_year
 from reviews.models import Category, Comment, Genre, Review, Title
 
 
@@ -90,18 +89,12 @@ class TitleSerializer(serializers.ModelSerializer):
                                          many=True)
     category = serializers.SlugRelatedField(slug_field='slug',
                                             queryset=Category.objects.all())
+    year = serializers.IntegerField(validators=(validate_year,))
     rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Title
         fields = '__all__'
-
-    def validate_year(self, value):
-        if value > timezone.now().year:
-            raise serializers.ValidationError(
-                "Год выпуска не может быть больше текущего года."
-            )
-        return value
 
     def get_rating(self, obj):
         ratings_sum = sum(review.score for review in obj.reviews.all())
