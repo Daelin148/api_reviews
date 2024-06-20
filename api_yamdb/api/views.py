@@ -141,15 +141,9 @@ class TokenObtainView(generics.CreateAPIView):
         serializer = TokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         username = serializer.data.get('username')
-        confirmation_code = serializer.data.get('confirmation_code')
         user = get_object_or_404(User, username=username)
-        if default_token_generator.check_token(user, confirmation_code):
-            token = AccessToken.for_user(user)
-            return Response({'token': f'{token}'}, status.HTTP_200_OK)
-        return Response(
-            {'message': 'Неверный код подтверждения.'},
-            status.HTTP_400_BAD_REQUEST
-        )
+        token = AccessToken.for_user(user)
+        return Response({'token': f'{token}'}, status.HTTP_200_OK)
 
 
 class UserViewSet(viewsets.ModelViewSet):
