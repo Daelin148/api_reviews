@@ -1,5 +1,7 @@
+from core.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, mixins, status, viewsets
@@ -9,10 +11,9 @@ from rest_framework.permissions import (AllowAny, IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
+from reviews.models import Category, Genre, Review, Title
 
 from api_yamdb.settings import ADM_MAIL
-from core.models import User
-from reviews.models import Category, Genre, Review, Title
 
 from .filters import TitleFilter
 from .permissions import (IsAdminAuthorModeratorOrReadOnly, IsAdminOnly,
@@ -61,6 +62,11 @@ class TitleViewSet(viewsets.ModelViewSet):
     filterset_class = TitleFilter
     permission_classes = (IsAdminOrReadOnly,)
     http_method_names = ('get', 'post', 'patch', 'delete',)
+
+    def get_queryset(self):
+        return Title.objects.all().annotate(
+            rating=Avg('reviews__score')
+        ).order_by('name')
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

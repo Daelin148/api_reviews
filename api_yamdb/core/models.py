@@ -52,9 +52,11 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        return (self.role == self.RoleChoices.ADMIN or
-                self.is_superuser or
-                self.is_staff)
+        return (
+            self.role == self.RoleChoices.ADMIN
+            or self.is_superuser
+            or self.is_staff
+        )
 
     @property
     def is_moderator(self):
@@ -64,7 +66,9 @@ class User(AbstractUser):
 class NameBaseModel(models.Model):
     """Абстрактная модель с полем name и строковым представлением."""
 
-    name = models.CharField(max_length=settings.LIMIT_NAME, verbose_name='Название')
+    name = models.CharField(
+        max_length=settings.LIMIT_NAME, verbose_name='Название'
+    )
 
     def __str__(self):
         return self.name
@@ -76,7 +80,9 @@ class NameBaseModel(models.Model):
 class NameSlugBaseModel(NameBaseModel):
     """Абстрактная модель с полем slug."""
 
-    slug = models.SlugField(unique=True, max_length=settings.LIMIT_SLUG, verbose_name='Слаг')
+    slug = models.SlugField(
+        unique=True, max_length=settings.LIMIT_SLUG, verbose_name='Слаг'
+    )
 
     class Meta:
         abstract = True

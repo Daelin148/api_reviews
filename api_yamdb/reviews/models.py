@@ -1,8 +1,8 @@
-from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models
-
 from core.models import AuthorPubDateText, NameBaseModel, NameSlugBaseModel
 from core.validators import validate_year
+from django.conf import settings
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
 
 
 class Category(NameSlugBaseModel):
@@ -44,9 +44,12 @@ class Title(NameBaseModel):
 class Review(AuthorPubDateText):
     """Модель отзывов."""
 
-    score = models.IntegerField(
+    score = models.PositiveSmallIntegerField(
         'Рейтинг',
-        validators=(MinValueValidator(1), MaxValueValidator(10))
+        validators=(
+            MinValueValidator(settings.MIN_RATING_VALUE),
+            MaxValueValidator(settings.MAX_RATING_VALUE)
+        )
     )
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE,
