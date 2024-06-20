@@ -1,11 +1,10 @@
-from django.contrib.auth.tokens import default_token_generator
-from django.conf import settings
-from rest_framework import serializers, status
-from rest_framework.generics import get_object_or_404
-from rest_framework.validators import UniqueValidator
-
 from core.models import User
 from core.validators import validate_username, validate_year
+from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator
+from rest_framework import serializers
+from rest_framework.generics import get_object_or_404
+from rest_framework.validators import UniqueValidator
 from reviews.models import Category, Comment, Genre, Review, Title
 
 
@@ -15,7 +14,9 @@ class SignUpSerializer(serializers.Serializer):
         max_length=settings.LIMIT_USERNAME,
         validators=[validate_username, ]
     )
-    email = serializers.EmailField(required=True, max_length=settings.LIMIT_EMAIL)
+    email = serializers.EmailField(
+        required=True, max_length=settings.LIMIT_EMAIL
+    )
 
     def validate(self, data):
         if User.objects.filter(username=data['username'],
@@ -92,18 +93,11 @@ class TitleSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(slug_field='slug',
                                             queryset=Category.objects.all())
     year = serializers.IntegerField(validators=(validate_year,))
-    rating = serializers.SerializerMethodField()
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Title
         fields = '__all__'
-
-    def get_rating(self, obj):
-        ratings_sum = sum(review.score for review in obj.reviews.all())
-        try:
-            return ratings_sum // obj.reviews.count()
-        except ZeroDivisionError:
-            return None
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)

@@ -1,10 +1,9 @@
 from csv import DictReader
 
+from core.models import User
 from django.conf import settings
 from django.core.management import BaseCommand
-
-from core.models import User
-from reviews.models import Category, Comment, Genre, GenreTitle, Review, Title
+from reviews.models import Category, Comment, Genre, Review, Title
 
 DATA_DIR = settings.STATICFILES_DIRS[0] / 'data'
 
@@ -49,8 +48,9 @@ class Command(BaseCommand):
     def load_genre_title(self):
         with open(DATA_DIR / 'genre_title.csv', encoding='utf-8') as data:
             for row in DictReader(data):
-                instance = GenreTitle(**row)
-                instance.save()
+                title = Title.objects.get(pk=row['title_id'])
+                genre = Genre.objects.get(pk=row['genre_id'])
+                title.genre.add(genre)
 
     def load_users(self):
         with open(DATA_DIR / 'users.csv', encoding='utf-8') as data:
