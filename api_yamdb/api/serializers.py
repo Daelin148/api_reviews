@@ -1,19 +1,21 @@
-from django.utils import timezone
-from rest_framework import serializers
+from django.contrib.auth.tokens import default_token_generator
+from django.conf import settings
+from rest_framework import serializers, status
+from rest_framework.generics import get_object_or_404
 from rest_framework.validators import UniqueValidator
 
 from core.models import User
-from core.validators import validate_username
+from core.validators import validate_username, validate_year
 from reviews.models import Category, Comment, Genre, Review, Title
 
 
 class SignUpSerializer(serializers.Serializer):
     username = serializers.CharField(
         required=True,
-        max_length=150,
+        max_length=settings.LIMIT_USERNAME,
         validators=[validate_username, ]
     )
-    email = serializers.EmailField(required=True, max_length=254)
+    email = serializers.EmailField(required=True, max_length=settings.LIMIT_EMAIL)
 
     def validate(self, data):
         if User.objects.filter(username=data['username'],
@@ -30,16 +32,26 @@ class SignUpSerializer(serializers.Serializer):
 class TokenSerializer(serializers.Serializer):
     username = serializers.CharField(
         required=True,
-        max_length=150,
+        max_length=settings.LIMIT_USERNAME,
         validators=(validate_username,)
     )
     confirmation_code = serializers.CharField(required=True)
+
+    def validate(self, data):
+        username = data.get('username')
+        confirmation_code = data.get('confirmation_code')
+        user = get_object_or_404(User, username=username)
+        if not default_token_generator.check_token(user, confirmation_code):
+            raise serializers.ValidationError(
+                'Неверный код подтверждения.'
+            )
+        return data
 
 
 class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
         required=True,
-        max_length=150,
+        max_length=settings.LIMIT_USERNAME,
         validators=[validate_username,
                     UniqueValidator(queryset=User.objects.all())]
     )
@@ -52,20 +64,9 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
 
-class UserMeSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(
-        required=True,
-        max_length=150,
-        validators=[validate_username,
-                    UniqueValidator(queryset=User.objects.all())]
-    )
+class UserMeSerializer(UserSerializer):
 
-    class Meta:
-        model = User
-        fields = (
-            'username', 'email', 'first_name',
-            'last_name', 'bio', 'role'
-        )
+    class Meta(UserSerializer.Meta):
         read_only_fields = ('role',)
 
 
@@ -90,18 +91,12 @@ class TitleSerializer(serializers.ModelSerializer):
                                          many=True)
     category = serializers.SlugRelatedField(slug_field='slug',
                                             queryset=Category.objects.all())
+    year = serializers.IntegerField(validators=(validate_year,))
     rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Title
         fields = '__all__'
-
-    def validate_year(self, value):
-        if value > timezone.now().year:
-            raise serializers.ValidationError(
-                "Год выпуска не может быть больше текущего года."
-            )
-        return value
 
     def get_rating(self, obj):
         ratings_sum = sum(review.score for review in obj.reviews.all())
