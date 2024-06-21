@@ -1,4 +1,4 @@
-from django.conf import settings
+from core import constants
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -13,7 +13,7 @@ class User(AbstractUser):
 
     username = models.CharField(
         'Имя пользователя',
-        max_length=settings.LIMIT_USERNAME,
+        max_length=constants.LIMIT_USERNAME,
         unique=True,
         blank=False,
         null=False,
@@ -21,19 +21,19 @@ class User(AbstractUser):
     )
     email = models.EmailField(
         'Электронная почта',
-        max_length=settings.LIMIT_EMAIL,
+        max_length=constants.LIMIT_EMAIL,
         unique=True,
         blank=False,
         null=False,
     )
     first_name = models.CharField(
         'Имя',
-        max_length=settings.LIMIT_FIRST_NAME,
+        max_length=constants.LIMIT_FIRST_NAME,
         blank=True,
     )
     last_name = models.CharField(
         "Фамилия",
-        max_length=settings.LIMIT_LAST_NAME,
+        max_length=constants.LIMIT_LAST_NAME,
         blank=True
     )
     bio = models.TextField(
@@ -42,7 +42,7 @@ class User(AbstractUser):
     )
     role = models.CharField(
         'Роль',
-        max_length=settings.LIMIT_ROLE,
+        max_length=constants.LIMIT_ROLE,
         choices=RoleChoices.choices,
         default=RoleChoices.USER,
     )
@@ -67,7 +67,7 @@ class NameBaseModel(models.Model):
     """Абстрактная модель с полем name и строковым представлением."""
 
     name = models.CharField(
-        max_length=settings.LIMIT_NAME, verbose_name='Название'
+        max_length=constants.LIMIT_NAME, verbose_name='Название'
     )
 
     def __str__(self):
@@ -81,7 +81,7 @@ class NameSlugBaseModel(NameBaseModel):
     """Абстрактная модель с полем slug."""
 
     slug = models.SlugField(
-        unique=True, max_length=settings.LIMIT_SLUG, verbose_name='Слаг'
+        unique=True, max_length=constants.LIMIT_SLUG, verbose_name='Слаг'
     )
 
     class Meta:
