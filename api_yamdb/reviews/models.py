@@ -1,6 +1,6 @@
+from core.constants import MAX_RATING_VALUE, MIN_RATING_VALUE
 from core.models import AuthorPubDateText, NameBaseModel, NameSlugBaseModel
 from core.validators import validate_year
-from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
@@ -47,8 +47,8 @@ class Review(AuthorPubDateText):
     score = models.PositiveSmallIntegerField(
         'Рейтинг',
         validators=(
-            MinValueValidator(settings.MIN_RATING_VALUE),
-            MaxValueValidator(settings.MAX_RATING_VALUE)
+            MinValueValidator(MIN_RATING_VALUE),
+            MaxValueValidator(MAX_RATING_VALUE)
         )
     )
     title = models.ForeignKey(

@@ -1,6 +1,6 @@
+from core.constants import LIMIT_EMAIL, LIMIT_USERNAME
 from core.models import User
 from core.validators import validate_username, validate_year
-from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
@@ -11,11 +11,11 @@ from reviews.models import Category, Comment, Genre, Review, Title
 class SignUpSerializer(serializers.Serializer):
     username = serializers.CharField(
         required=True,
-        max_length=settings.LIMIT_USERNAME,
+        max_length=LIMIT_USERNAME,
         validators=[validate_username, ]
     )
     email = serializers.EmailField(
-        required=True, max_length=settings.LIMIT_EMAIL
+        required=True, max_length=LIMIT_EMAIL
     )
 
     def validate(self, data):
@@ -33,7 +33,7 @@ class SignUpSerializer(serializers.Serializer):
 class TokenSerializer(serializers.Serializer):
     username = serializers.CharField(
         required=True,
-        max_length=settings.LIMIT_USERNAME,
+        max_length=LIMIT_USERNAME,
         validators=(validate_username,)
     )
     confirmation_code = serializers.CharField(required=True)
@@ -52,7 +52,7 @@ class TokenSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
         required=True,
-        max_length=settings.LIMIT_USERNAME,
+        max_length=LIMIT_USERNAME,
         validators=[validate_username,
                     UniqueValidator(queryset=User.objects.all())]
     )
